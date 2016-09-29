@@ -211,13 +211,13 @@ sprintf(<span class="pl-s"><span class="pl-pds">"</span>Cores registered = %d<sp
 <h3>
 <a id="recursive-feature-elimination-step" class="anchor" href="#recursive-feature-elimination-step" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Recursive Feature Elimination Step</h3>
 
-<p>Finally in data cleaning and pre-processing stage we analize the actual variables importance based on a trained model and obtain a automatic features selection model based on <code>rfe</code> available within <code>caret</code> package.We will get two samples of our data and then train two different <code>rfe</code> models based on random forests followed by plot view/analysis on both. First plot of number of features vs cross-validation accuracy:</p>
+<p>Finally in data cleaning and pre-processing stage we analyze the actual variables importance based on a trained model and obtain a automatic features selection model based on <code>rfe</code> available within <code>caret</code> package.We will get two samples of our data and then train two different <code>rfe</code> models based on random forests followed by plot view/analysis on both. First plot of number of features vs cross-validation accuracy:</p>
 
-<p><img src="https://andreidi.github.io/WeightLiftingPrediction/fig1.png" alt=""></p>
+<p><img src="pml-weight_lifting_pred_files/figure-markdown_github/unnamed-chunk-9-1.png" alt=""></p>
 
 <p>And now the second plot of predictor variables quantity vs prediction accuracy:</p>
 
-<p><img src="https://andreidi.github.io/WeightLiftingPrediction/fig2.png" alt=""></p>
+<p><img src="pml-weight_lifting_pred_files/figure-markdown_github/unnamed-chunk-10-1.png" alt=""></p>
 
 <p>Based on the two plots it is obvious that best number of predictors is between 5 and 12. Now we combine our findings in order to obtain a final list of predictor variables:</p>
 
@@ -327,7 +327,7 @@ sprintf(<span class="pl-s"><span class="pl-pds">"</span>Cores registered = %d<sp
 </code></pre>
 
 <h2>
-<a id="and-the-custom-constructed-summary-of-the-training-and-cross-validation-process" class="anchor" href="#and-the-custom-constructed-summary-of-the-training-and-cross-validation-process" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>And the custom constructed summary of the training and cross-validation process. Best predictors have over 95% accuracy</h2>
+<a id="and-the-custom-constructed-summary-of-the-training-and-cross-validation-process" class="anchor" href="#and-the-custom-constructed-summary-of-the-training-and-cross-validation-process" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>And the custom constructed summary of the training and cross-validation process</h2>
 
 <pre><code>##   All.Methods Cross.Accuracy Training.Time
 ## 1         lda      0.3907724          0.91
@@ -338,11 +338,11 @@ sprintf(<span class="pl-s"><span class="pl-pds">"</span>Cores registered = %d<sp
 </code></pre>
 
 <h3>
-<a id="alllmost-there-" class="anchor" href="#alllmost-there-" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Alllmost there !</h3>
+<a id="almost-there-" class="anchor" href="#almost-there-" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Almost there !</h3>
 
-<p>Now that we have our model lets apply it on testing dataset and display confusion matrix so we can visually compare test result with cross validation one. We could also use a random forest or other classifier to ensemble to 2 or 3 predictors.</p>
+<p>Now that we have our model lets apply it on testing dataset and display confusion matrix so we can visually compare test result with cross validation one. We could also use a random forest or other classifier to ensemble to 2 or 3 predictors. Nevertheless this is not needed as to predictors achieved over 95% accuracy.</p>
 
-<pre><code>## [1] "Predicting with best bredictor: xgbTree"
+<pre><code>## [1] "Predicting with best predictor: xgbTree"
 
 ## Confusion Matrix and Statistics
 ## 
@@ -378,7 +378,7 @@ sprintf(<span class="pl-s"><span class="pl-pds">"</span>Cores registered = %d<sp
 </code></pre>
 
 <h2>
-<a id="now-finally-apply-best-model-on-unseen-observation" class="anchor" href="#now-finally-apply-best-model-on-unseen-observation" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Now finally apply best model (xgBoost model that achieved 99% accuracy on cross/test) on unseen observation:</h2>
+<a id="now-finally-apply-best-model-on-unseen-observation-xgboost-model-constantly-achieved-over-98-accuracy-on-all-crossvaltests" class="anchor" href="#now-finally-apply-best-model-on-unseen-observation-xgboost-model-constantly-achieved-over-98-accuracy-on-all-crossvaltests" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Now finally apply best model on unseen observation. xGBoost model constantly achieved over 98% accuracy on all crossval/tests:</h2>
 
 <pre><code>## [1] "Now predicting unseen observations with: xgbTree"
 
