@@ -1,0 +1,300 @@
+---
+title: "Practical Machine Learning Course Project: Weight Lifting prediction"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Short description
+
+In this script I have used a specific approach for data exploration and clening and also a specific one for model selection, training, cross-validation and finally testing
+
+###For data exploration the code analyses and cleans:
+  - clean prediction related useless data columns such as index, person names, etc
+  - clean **NA data predictor** variables
+  - clean **empty data** predictor variables
+  - near **zero variance predictor** variables
+  - predictor **variables correlation** analysis (pair feature plot excluded for this case)
+  - analyze **variables importance** based on Recursive Feature Elimination 
+
+###For model preparation, selection, cross-validationL
+   - from initial training dataset three subsets are generated: 
+     training, cross-validation and testing
+   - **optional** PCA is used to preprocess training data then PCA model is used to fit cross/testing
+   - a **list** of models is used in a automated/iterrative process
+   - each model is **cross** evaluated including running time
+
+
+## Code sections
+
+
+setup caret and also  parallel processing so we can use all cores
+in order to speed up all the heavy computing tasks:
+
+```{r , echo = FALSE, message=FALSE}
+library(caret)
+library(doParallel)
+library(foreach)
+```
+
+```{r}
+avail_cores <- detectCores() 
+p_cluster <- makeCluster(avail_cores)
+registerDoParallel(p_cluster)
+sprintf("Cores registered = %d",getDoParWorkers())
+```
+
+
+
+##  LOADING AND CLEANING
+
+We have to identify current script working directory then load all data in data exploration dataframe `exploreData` and make a copy in `finalData` that will be used later for final cleaning process.
+
+```{r}
+exploreData <- read.csv("pml-training.csv")
+finalData <- data.frame(exploreData)
+```
+
+
+First lets do a quick analysis of zero variance predictors with `nearZeroVar(exploreData, saveMetrics = TRUE)`. We will display the total ammount of near-zero variance predictors and the head of the table containing them. We are going to maintain a list of `ALL DROPPED COLUMNS` in order to use it for the final test dataset pre-processing together with the PCA model if any.
+```{r, echo = FALSE}
+varinfo <- nearZeroVar(exploreData, saveMetrics = TRUE)
+sortedVarinfo <- varinfo[order(varinfo["percentUnique"]),]
+sprintf("Total number of near-zero var preds = %d", sum(sortedVarinfo$nzv))
+head(sortedVarinfo[sortedVarinfo$nzv==TRUE,])
+```
+
+
+Now it is bvious we have a lot of **cleaning** to do on data so we need to start the data exploration and cleanning process - first drop totally useless columns such as observation number, name and then start working on the NA columns, find if there are NA-only columns or columns with more than 95% NA, get na column indexes then finally get the actual column names and display them:
+```{r, echo=FALSE}
+dropped_columns <- c("X",
+                     "user_name", 
+                     "raw_timestamp_part_1",
+                     "raw_timestamp_part_2",
+                     "cvtd_timestamp")
+exploreData <- exploreData[setdiff(colnames(exploreData),dropped_columns)]
+
+na_cols <- colSums(is.na(exploreData)) >= nrow(exploreData)*0.95
+na_col_names <- colnames(exploreData)[na_cols]
+sprintf("Number of NA columns dropped = %d",length(na_col_names))
+print(na_col_names)
+nona_columns <- setdiff(colnames(exploreData),na_col_names)
+exploreData <- exploreData[nona_columns]
+dropped_columns <- c(dropped_columns, na_col_names)
+```
+
+
+Now get columns that are actually **empty** (actually similar to na - more than **95% empty**), display all of them and finally perform cleaning on dataset:
+
+```{r, echo=FALSE}
+empty_cols <- colSums(exploreData=="") >= nrow(exploreData)*0.95
+empty_col_names <- colnames(exploreData)[empty_cols]
+sprintf("Number of Empty columns dropped = %d",length(empty_col_names))
+print(empty_col_names)
+nonempty_columns <- setdiff(colnames(exploreData),empty_col_names)
+exploreData <- exploreData[nonempty_columns] 
+dropped_columns <- c(dropped_columns,empty_col_names)
+```
+
+
+###Predictors variance and correlation analysis
+
+The next step in building our model, after basic cleaning is to analyze again the predictors variance using `nearZeroVar`. Then we will sort and display the predictors with least variance and also display all factor variables and their summary omiting the label `classe`. Finally we drop the factor variables with near-zero variance:
+
+```{r, echo = FALSE}
+varinfo <- nearZeroVar(exploreData, saveMetrics = TRUE)
+sortedVarinfo <- varinfo[order(varinfo["percentUnique"]),]
+factor_col_names <- setdiff(names(Filter(is.factor, exploreData)),c("classe"))
+print("Near zero variance:")
+head(sortedVarinfo)
+print(c("Factors variables:",factor_col_names))
+summary(exploreData[factor_col_names])
+exploreData <- exploreData[setdiff(colnames(exploreData),factor_col_names)]
+dropped_columns <- c(dropped_columns, factor_col_names)
+```
+
+
+##Variable correlation analysis
+
+Now analyze the predictor variables correlation in order determine if we have very high correlation. We do this by calculating correlation matrix with `cor(exploreData[,setdiff(colnames(exploreData),c("classe"))])` (excluding label `classe` column):
+
+```{r, echo=FALSE}
+correlationMatrix <-cor(exploreData[,setdiff(colnames(exploreData),c("classe"))])
+highlyCorrelated <- findCorrelation(correlationMatrix, cutoff=0.75)
+print(c("Highly correlated predictor variables:", colnames(exploreData)[highlyCorrelated]))
+```
+
+Due to high correlation between variable we might need to apply PCA later or use a feature selection method available in `caret` package
+
+###Recursive Feature Elimination Step
+
+Finally in data cleaning and pre-processing stage we analize the actual variables importance based on a trained model and obtain a automatic features selection model based on `rfe` available within `caret` package.We will get two samples of our data and then train two different `rfe` models based on random forests followed by plot view/analysis on both. 
+First plot of number of features vs cross-validation accuracy: 
+
+```{r, echo=FALSE}
+inData1 <- createDataPartition(exploreData$classe,p = 0.1, list = FALSE)
+rfData1 <- exploreData[inData1,]
+rfInData2 <- exploreData[-inData1,]
+inData2 <- createDataPartition(rfInData2$classe,p = 0.1, list = FALSE)
+rfData2 <- rfInData2[inData2,]
+
+x1 <- rfData1[,setdiff(colnames(rfData1),c("classe"))]
+y1 <- rfData1$classe
+
+x2 <- rfData2[,setdiff(colnames(rfData2),c("classe"))]
+y2 <- rfData2$classe
+
+rfeCtrl <- rfeControl(functions=rfFuncs, 
+                      method="cv", 
+                      number=10,
+                      repeats = 3)
+results1 <- rfe(x1, y1, sizes=c(5,10,15,25,40), rfeControl=rfeCtrl)
+results2 <- rfe(x2, y2, sizes=c(5,10,15,25,40), rfeControl=rfeCtrl)
+plot(results1, type=c("g", "o"))
+```
+
+
+And now the second plot of predictor variables quantity vs prediction accuracy:
+
+```{r, echo=FALSE}
+plot(results2, type=c("g", "o"))
+```
+
+
+Based on the two plots it is obvious that best number of predictors is between 5 and 12. Now we combine our findings in order to obtain a final list of predictor variables: 
+
+```{r, echo = FALSE}
+final_predictors <- unique(c(predictors(results1),predictors(results2)))
+print(c("FINAL PREDICTORS :",final_predictors))
+
+```
+
+
+## TRAINING AND TESTING MODELS 
+
+Finally we can now prepare training, cross-validation and test datasets (training dataset 60%, crossval dataset 20%, testing dataset 20%), but first having the list of all `dropped_columns` we can either apply it to `finalData` or we could use the automated selection of predictor variables. 
+Based on this, we have a few special meta-parameters for customizing our model:
+- `useAutomaticPredictors` controls if we use or not the short list of 
+  predictors generated by **Recursive Feature Elimination**
+- `usePCA` controls if we use or not dimensionality reduction preprocessing
+  based on **Principal Components Analysis**
+  
+  
+```{r, message=FALSE}
+useAutomaticPredictors = TRUE
+usePCA = FALSE
+
+if (useAutomaticPredictors){
+  good_columns <- c(final_predictors,c("classe"))
+  pred_columns <- final_predictors 
+}else{
+  good_columns <- setdiff(colnames(finalData), dropped_columns)
+  pred_columns <- setdiff(good_columns, c("classe"))
+  
+}
+
+finalData <- finalData[good_columns]
+inTraining <- createDataPartition(finalData$classe, p=0.6, list=FALSE)
+trainingStd <- finalData[inTraining,]
+testdataStd <- finalData[-inTraining,]
+inVal <- createDataPartition(testdataStd$classe, p=0.5, list=FALSE)
+crossvalStd <- testdataStd[inVal,]
+testingStd <- testdataStd[-inVal,]
+##
+## Now the PCA pre-processing stage (if needed)
+##
+if (usePCA)
+{
+  PCA.model <- preProcess(trainingStd[pred_columns],method="pca", thresh=0.95)
+  training <- predict(PCA.model, trainingStd)
+  crossvalidation <- predict(PCA.model,crossvalStd )
+  testing <- predict(PCA.model, testingStd)  
+} else
+{
+  training <- trainingStd
+  crossvalidation <- crossvalStd
+  testing <- testingStd
+}
+
+```
+
+
+##Multi-model cross-validation testing
+Now I train several different models, analyze them and then and then choose the best model based on best cross validation score. So first stage is timed training for each proposed model and cross-validations. Keep all accuracy values in vectors then combine in dataframe to finally display.
+
+```{r}
+All.Methods <- c("lda","rpart","knn","lvq","xgbTree")
+nr_models <- length(All.Methods)
+Cross.Accuracy <- c()
+Training.Time <- c()
+bestAccuracy <- 0 
+
+for (c_model in 1:nr_models){
+  
+  methodName <-  All.Methods[c_model]
+  print(paste0("Training ",methodName,"..."))
+  tmr_start <- proc.time()
+  curr.model <- train(classe ~ .,
+                      data = training,
+                      method = methodName)
+  tmr_end <- proc.time()
+  print(paste0("Done training ",methodName,"."))  
+  Training.Time[c_model] = (tmr_end-tmr_start)[3]
+  
+  preds<- predict(curr.model,crossvalidation)
+
+  cfm <- confusionMatrix(preds,crossvalStd$classe)
+  Cross.Accuracy[c_model] <- cfm$overall['Accuracy']
+  
+  if(bestAccuracy < Cross.Accuracy[c_model]){
+    best.model <- curr.model
+    bestAccuracy <- Cross.Accuracy[c_model]
+  }
+  
+}
+
+```
+
+## And the custom constructed summary of the training and cross-validation process
+
+```{r, echo = FALSE}
+summary_info <- data.frame(All.Methods,Cross.Accuracy,Training.Time)
+summary_info <- summary_info[order(summary_info$Cross.Accuracy),]
+print(summary_info)
+
+```
+
+
+### Alllmost there !
+Now that we have our model lets apply it on testing dataset and display confusion matrix so we can visually compare test result with cross validation one. We could also use a random forest or other classifier to ensemble to 2 or 3 predictors.
+
+```{r, echo = FALSE}
+print(paste("Predicting with best bredictor:",best.model$method))
+testpred <- predict(best.model,testing)
+confusionMatrix(testpred,testingStd$classe)
+```
+
+
+
+## Now finally apply best model on unseen observation
+
+
+```{r, echo = FALSE}
+unseen.data <- read.csv("pml-testing.csv")
+unseen.data <- unseen.data[pred_columns]
+
+if (usePCA)
+{
+  unseen.data <- predict(PCA.model,unseen.data)
+}
+print(paste("Now predicting unseen observations with:",best.model$method))                        
+finalPredictions <- predict(best.model,unseen.data)
+print(finalPredictions)
+
+stopCluster(p_cluster)
+
+```
+
+
