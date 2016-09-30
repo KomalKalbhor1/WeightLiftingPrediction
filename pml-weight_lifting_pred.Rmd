@@ -9,22 +9,27 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Short description
 
-In this script I have used a specific approach for data exploration and clening and also a specific one for model selection, training, cross-validation and finally testing
+This page presents my whole approach for solving Practical Machine Learning Course Exercise from Johns Hopkins University Data Science Specialization on Coursera. Data Science and Practical Machine Learning creators are: 
+**Roger D. Peng**, PhD, Associate Professor, Biostatistics; **Brian Caffo**, PhD, Professor, Biostatistics; **Jeff Leek**, PhD, Associate Professor, Biostatistics.
+In this script I have used a specific approach for data exploration and cleaning and also my specific approach for model selection, training, cross-validation and finally testing. 
+###Note: Some steps both in data exploration/cleaning and model training could have been omitted from this final "transcript" of my work, however I decided to include everything to present the approach, the order of the steps, the logical conclusions I derived from each step - even if some of those steps along the way have become partially or totally obsolete.  
 
-###For data exploration the code analyses and cleans:
-  - clean prediction related useless data columns such as index, person names, etc
-  - clean **NA data predictor** variables
-  - clean **empty data** predictor variables
-  - near **zero variance predictor** variables
-  - predictor **variables correlation** analysis (pair feature plot excluded for this case)
-  - analyze **variables importance** based on Recursive Feature Elimination 
+## For data exploration:
 
-###For model preparation, selection, cross-validationL
-   - from initial training dataset three subsets are generated: 
-     training, cross-validation and testing
-   - **optional** PCA is used to preprocess training data then PCA model is used to fit cross/testing
-   - a **list** of models is used in a automated/iterrative process
-   - each model is **cross** evaluated including running time
+-   clean useless (useless in regard to prediction) data columns such as index, person names, etc
+-   clean **NA data predictor** variables
+-   clean **empty data** predictor variables
+-   near **zero variance predictor** variables
+-   predictor **variables correlation** analysis (pair feature plot excluded for this case)
+-   analyze **variables importance** based on Recursive Feature Elimination and choose best selection
+
+## For model preparation, selection, cross-validation
+
+-   from initial training dataset three subsets are generated: training, cross-validation and testing
+-   **optional** PCA is used to pre-process training data then PCA model is used to fit cross/testing
+-   there is option to either use or not PCA as well as use or not the automated selected features: for final run I chosed not to use PCA and used automate selected features (based on RFE)
+-   a **list** of models is used in a automated/iterative process
+-   each model is **cross** evaluated including running time
 
 
 ## Code sections
@@ -268,7 +273,7 @@ print(summary_info)
 
 
 ### Alllmost there !
-Now that we have our model lets apply it on testing dataset and display confusion matrix so we can visually compare test result with cross validation one. We could also use a random forest or other classifier to ensemble to 2 or 3 predictors.
+Now that we have our final model lets apply it on testing dataset and then display confusion matrix so we can visually compare test result with previous cross validation one. We could also use a random forest or other classifier to ensemble to 2 or 3 predictors. Nevertheless this is not needed for this particular exercise as top two predictors achieved over 95% accuracy with the best one constantly over 99% with a out-of-sample error rate of under 1% based on cross-validation dataset (used for all predictors) and the second test dataset (used only for best model).
 
 ```{r, echo = FALSE}
 print(paste("Predicting with best bredictor:",best.model$method))
@@ -278,8 +283,9 @@ confusionMatrix(testpred,testingStd$classe)
 
 
 
-## Now finally apply best model on unseen observation
+## Finally apply best model on unseen observation
 
+Now finally apply best model on unseen observation. Note: `xGBoost` model constantly achieved over 99% accuracy on all cross-validation testing pointing to a out-of-sample error rate under 1%:
 
 ```{r, echo = FALSE}
 unseen.data <- read.csv("pml-testing.csv")
