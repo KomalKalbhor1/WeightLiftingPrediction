@@ -300,7 +300,7 @@ And the custom constructed summary of the training and cross-validation process
 
 ### Alllmost there !
 
-Now that we have our model lets apply it on testing dataset and display confusion matrix so we can visually compare test result with cross validation one. We could also use a random forest or other classifier to ensemble to 2 or 3 predictors.
+Now that we have our final model lets apply it on testing dataset and then display confusion matrix so we can visually compare test result with previous cross validation one. We could also use a random forest or other classifier to ensemble to 2 or 3 predictors. Nevertheless this is not needed for this particular exercise as top two predictors achieved over 95% accuracy with the best one constantly over 99% with a out-of-sample error rate of under 1% based on cross-validation dataset (used for all predictors) and the "second" test dataset (used only for best model).
 
     ## [1] "Predicting with best bredictor: xgbTree"
 
@@ -336,8 +336,9 @@ Now that we have our model lets apply it on testing dataset and display confusio
     ## Detection Prevalence   0.2837   0.1935   0.1746   0.1639   0.1843
     ## Balanced Accuracy      0.9987   1.0000   0.9998   1.0000   0.9997
 
-Now finally apply best model on unseen observation
+Finally apply best model on unseen observation
 --------------------------------------------------
+Now finally apply best model on unseen observation. Note: `xGBoost` model constantly achieved over 99% accuracy on all cross-validation testing pointing to a out-of-sample error rate under 1%:
 
     ## [1] "Now predicting unseen observations with: xgbTree"
 
