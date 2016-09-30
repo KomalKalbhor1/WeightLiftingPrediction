@@ -1,25 +1,37 @@
 <!DOCTYPE html>
-<html lang="en-us">
+<html>
   <head>
-    <meta charset="UTF-8">
-    <title>Weight Lifting prediction mini data-science exercise by andreidi</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
-    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <link href='https://fonts.googleapis.com/css?family=Chivo:900' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
-    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-dark.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <title>Weight Lifting prediction mini data-science exercise by andreidi</title>
   </head>
-  <body>
-    <section class="page-header">
-      <h1 class="project-name">Weight Lifting prediction mini data-science exercise</h1>
-      <h2 class="project-tagline">Practical Machine Learning Write-up for predictions based on Weight Lifting Exercise Dataset</h2>
-      <a href="https://github.com/andreidi/WeightLiftingPrediction" class="btn">View on GitHub</a>
-      <a href="https://github.com/andreidi/WeightLiftingPrediction/zipball/master" class="btn">Download .zip</a>
-      <a href="https://github.com/andreidi/WeightLiftingPrediction/tarball/master" class="btn">Download .tar.gz</a>
-    </section>
 
-    <section class="main-content">
-      <h1>
+  <body>
+    <div id="container">
+      <div class="inner">
+
+        <header>
+          <h1>Weight Lifting prediction mini data-science exercise</h1>
+          <h2>Practical Machine Learning Write-up for predictions based on Weight Lifting Exercise Dataset</h2>
+        </header>
+
+        <section id="downloads" class="clearfix">
+          <a href="https://github.com/andreidi/WeightLiftingPrediction/zipball/master" id="download-zip" class="button"><span>Download .zip</span></a>
+          <a href="https://github.com/andreidi/WeightLiftingPrediction/tarball/master" id="download-tar-gz" class="button"><span>Download .tar.gz</span></a>
+          <a href="https://github.com/andreidi/WeightLiftingPrediction" id="view-on-github" class="button"><span>View on GitHub</span></a>
+        </section>
+
+        <hr>
+
+        <section id="main_content">
+          <h1>
 <a id="practical-machine-learning-course-project-weight-lifting-prediction" class="anchor" href="#practical-machine-learning-course-project-weight-lifting-prediction" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Practical Machine Learning Course Project: Weight Lifting prediction</h1>
 
 <h2>
@@ -32,8 +44,8 @@ In this script I have used a specific approach for data exploration and cleaning
 <h3>
 <a id="note-some-steps-both-in-data-explorationcleaning-and-model-training-could-have-been-omitted-from-this-final-transcript-of-my-work-however-i-decided-to-include-everything-to-present-the-approach-the-order-of-the-steps-the-logical-conclusions-i-derived-from-each-step---even-if-some-of-those-steps-along-the-way-have-become-partially-or-totally-obsolete" class="anchor" href="#note-some-steps-both-in-data-explorationcleaning-and-model-training-could-have-been-omitted-from-this-final-transcript-of-my-work-however-i-decided-to-include-everything-to-present-the-approach-the-order-of-the-steps-the-logical-conclusions-i-derived-from-each-step---even-if-some-of-those-steps-along-the-way-have-become-partially-or-totally-obsolete" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Note: Some steps both in data exploration/cleaning and model training could have been omitted from this final "transcript" of my work, however I decided to include everything to present the approach, the order of the steps, the logical conclusions I derived from each step - even if some of those steps along the way have become partially or totally obsolete.</h3>
 
-<h3>
-<a id="for-data-exploration" class="anchor" href="#for-data-exploration" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>For data exploration:</h3>
+<h2>
+<a id="for-data-exploration" class="anchor" href="#for-data-exploration" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>For data exploration:</h2>
 
 <ul>
 <li>  clean useless (useless in regard to prediction) data columns such as index, person names, etc</li>
@@ -44,8 +56,8 @@ In this script I have used a specific approach for data exploration and cleaning
 <li>  analyze <strong>variables importance</strong> based on Recursive Feature Elimination and choose best selection</li>
 </ul>
 
-<h3>
-<a id="for-model-preparation-selection-cross-validation" class="anchor" href="#for-model-preparation-selection-cross-validation" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>For model preparation, selection, cross-validation</h3>
+<h2>
+<a id="for-model-preparation-selection-cross-validation" class="anchor" href="#for-model-preparation-selection-cross-validation" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>For model preparation, selection, cross-validation</h2>
 
 <ul>
 <li>  from initial training dataset three subsets are generated: training, cross-validation and testing</li>
@@ -58,7 +70,7 @@ In this script I have used a specific approach for data exploration and cleaning
 <h2>
 <a id="code-sections" class="anchor" href="#code-sections" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Code sections</h2>
 
-<p>setup caret and also parallel processing so we can use all cores in order to speed up all the heavy computing tasks:</p>
+<p>Begin with loading <code>caret</code> and also <code>parallel</code> processing so we can use all cores in order to speed up all the heavy computing tasks:</p>
 
 <div class="highlight highlight-source-r"><pre><span class="pl-smi">avail_cores</span> <span class="pl-k">&lt;-</span> detectCores() 
 <span class="pl-smi">p_cluster</span> <span class="pl-k">&lt;-</span> makeCluster(<span class="pl-smi">avail_cores</span>)
@@ -382,15 +394,15 @@ sprintf(<span class="pl-s"><span class="pl-pds">"</span>Cores registered = %d<sp
 ##  [1] B A B A A E D B A A B C B A E E A B B B
 ## Levels: A B C D E
 </code></pre>
+        </section>
 
-      <footer class="site-footer">
-        <span class="site-footer-owner"><a href="https://github.com/andreidi/WeightLiftingPrediction">Weight Lifting prediction mini data-science exercise</a> is maintained by <a href="https://github.com/andreidi">andreidi</a>.</span>
+        <footer>
+          Weight Lifting prediction mini data-science exercise is maintained by <a href="https://github.com/andreidi">andreidi</a><br>
+          This page was generated by <a href="https://pages.github.com">GitHub Pages</a>. Tactile theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.
+        </footer>
 
-        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
-      </footer>
-
-    </section>
-
-  
+        
+      </div>
+    </div>
   </body>
 </html>
