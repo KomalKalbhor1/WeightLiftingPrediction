@@ -35,7 +35,7 @@
 <a id="practical-machine-learning-course-project-weight-lifting-prediction" class="anchor" href="#practical-machine-learning-course-project-weight-lifting-prediction" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Practical Machine Learning Course Project: Weight Lifting prediction</h1>
 
 <h2>
-<a id="short-description" class="anchor" href="#short-description" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Short description</h2>
+<a id="the-short-description" class="anchor" href="#the-short-description" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>The Short description</h2>
 
 <p>This page presents my whole approach for solving Practical Machine Learning Course Exercise from Johns Hopkins University Data Science Specialization on Coursera. Data Science and Practical Machine Learning creators are: 
 <strong>Roger D. Peng</strong>, PhD, Associate Professor, Biostatistics; <strong>Brian Caffo</strong>, PhD, Professor, Biostatistics; <strong>Jeff Leek</strong>, PhD, Associate Professor, Biostatistics.
@@ -43,6 +43,15 @@ In this script I have used a specific approach for data exploration and cleaning
 
 <h3>
 <a id="note-some-steps-both-in-data-explorationcleaning-and-model-training-could-have-been-omitted-from-this-final-transcript-of-my-work-however-i-decided-to-include-everything-to-present-the-approach-the-order-of-the-steps-the-logical-conclusions-i-derived-from-each-step---even-if-some-of-those-steps-along-the-way-have-become-partially-or-totally-obsolete" class="anchor" href="#note-some-steps-both-in-data-explorationcleaning-and-model-training-could-have-been-omitted-from-this-final-transcript-of-my-work-however-i-decided-to-include-everything-to-present-the-approach-the-order-of-the-steps-the-logical-conclusions-i-derived-from-each-step---even-if-some-of-those-steps-along-the-way-have-become-partially-or-totally-obsolete" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Note: Some steps both in data exploration/cleaning and model training could have been omitted from this final "transcript" of my work, however I decided to include everything to present the approach, the order of the steps, the logical conclusions I derived from each step - even if some of those steps along the way have become partially or totally obsolete.</h3>
+
+<h2>
+<a id="the-background" class="anchor" href="#the-background" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>The Background</h2>
+
+<p>This text is based on Coursera presentation of the present Data Science exercise:
+<em>Using devices such as Jawbone Up, Nike FuelBand, and Fitbit it is now possible to collect a large amount of data about personal activity relatively inexpensively. These type of devices are part of the quantified self movement – a group of enthusiasts who take measurements about themselves regularly to improve their health, to find patterns in their behavior, or because they are tech geeks. One thing that people regularly do is quantify how much of a particular activity they do, but they rarely quantify how well they do it. In this project, your goal will be to use data from accelerometers on the belt, forearm, arm, and dumbell of 6 participants. They were asked to perform barbell lifts correctly and incorrectly in 5 different ways. More information is available from the website here: <a href="http://groupware.les.inf.puc-rio.br/har">http://groupware.les.inf.puc-rio.br/har</a> (see the section on the Weight Lifting Exercise Dataset)</em>.</p>
+
+<h2>
+<a id="the-approach" class="anchor" href="#the-approach" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>The approach</h2>
 
 <h2>
 <a id="for-data-exploration" class="anchor" href="#for-data-exploration" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>For data exploration:</h2>
@@ -83,14 +92,14 @@ sprintf(<span class="pl-s"><span class="pl-pds">"</span>Cores registered = %d<sp
 <h2>
 <a id="loading-and-cleaning" class="anchor" href="#loading-and-cleaning" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>LOADING AND CLEANING</h2>
 
-<p>We have to identify current script working directory then load all data in data exploration dataframe <code>exploreData</code> and make a copy in <code>finalData</code> that will be used later for final cleaning process.</p>
+<p>To start we have to identify current script working directory then load all data in data exploration dataframe <code>exploreData</code> and make a copy in <code>finalData</code> that will be used later on for final cleaning process.</p>
 
 <div class="highlight highlight-source-r"><pre><span class="pl-smi">exploreData</span> <span class="pl-k">&lt;-</span> read.csv(<span class="pl-s"><span class="pl-pds">"</span>pml-training.csv<span class="pl-pds">"</span></span>)
 <span class="pl-smi">finalData</span> <span class="pl-k">&lt;-</span> <span class="pl-k">data.frame</span>(<span class="pl-smi">exploreData</span>)</pre></div>
 
-<p>First lets do a quick analysis of zero variance predictors with <code>nearZeroVar(exploreData, saveMetrics = TRUE)</code>. We will display the total amount of near-zero variance predictors and the head of the table containing them. We are going to maintain a list of <code>ALL DROPPED COLUMNS</code> in order to use it for the final test dataset pre-processing together with the PCA model if any.</p>
+<p>First lets do a quick analysis of zero variance predictors with <code>nearZeroVar(exploreData, saveMetrics = TRUE)</code>. We will display the total amount of near-zero variance predictors and the head of the table containing them. We are going to maintain a list of <code>ALL DROPPED COLUMNS</code> in order to use it for the final test dataset pre-processing (together with the PCA model if any).</p>
 
-<pre><code>## [1] "Total number of near-zero var preds = 60"
+<pre><code>## [1] "Total number of to-be-dropped near-zero var features = 60"
 
 ##                       freqRatio percentUnique zeroVar  nzv
 ## new_window             47.33005    0.01019264   FALSE TRUE
@@ -103,7 +112,7 @@ sprintf(<span class="pl-s"><span class="pl-pds">"</span>Cores registered = %d<sp
 
 <p>Now it is obvious we have a lot of <strong>cleaning</strong> to do on data so we need to start the data exploration and cleaning process - first drop totally useless columns such as observation number, name and then start working on the NA columns, find if there are NA-only columns or columns with more than 95% NA, get na column indexes then finally get the actual column names and display them:</p>
 
-<pre><code>## [1] "Number of NA columns dropped = 67"
+<pre><code>## [1] "Number of NA columns to-be-dropped = 67"
 
 ##  [1] "max_roll_belt"            "max_picth_belt"          
 ##  [3] "min_roll_belt"            "min_pitch_belt"          
@@ -169,7 +178,7 @@ sprintf(<span class="pl-s"><span class="pl-pds">"</span>Cores registered = %d<sp
 
 <p>The next step in building our model, after basic cleaning is to analyze again the predictors variance using <code>nearZeroVar</code>. Then we will sort and display the predictors with least variance and also display all factor variables and their summary omitting the label <code>classe</code>. Finally we drop the factor variables with near-zero variance:</p>
 
-<pre><code>## [1] "Near zero variance:"
+<pre><code>## [1] "Near zero variance table:"
 
 ##                      freqRatio percentUnique zeroVar   nzv
 ## new_window           47.330049    0.01019264   FALSE  TRUE
@@ -179,7 +188,7 @@ sprintf(<span class="pl-s"><span class="pl-pds">"</span>Cores registered = %d<sp
 ## total_accel_arm       1.024526    0.33635715   FALSE FALSE
 ## gyros_belt_y          1.144000    0.35164611   FALSE FALSE
 
-## [1] "Factors variables:" "new_window"
+## [1] "Factors variables to be dropped:" "new_window"
 
 ##  new_window 
 ##  no :19216  
@@ -215,7 +224,7 @@ sprintf(<span class="pl-s"><span class="pl-pds">"</span>Cores registered = %d<sp
 ## [22] "gyros_arm_x"
 </code></pre>
 
-<p>Due to high correlation between variable we might need to apply PCA later or use a feature selection method available in <code>caret</code> package</p>
+<p>Due to high correlation between variable we might need to apply PCA later or use a feature selection methods available in the <code>caret</code> package</p>
 
 <h3>
 <a id="recursive-feature-elimination-step" class="anchor" href="#recursive-feature-elimination-step" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Recursive Feature Elimination Step</h3>
@@ -387,7 +396,7 @@ sprintf(<span class="pl-s"><span class="pl-pds">"</span>Cores registered = %d<sp
 </code></pre>
 
 <h2>
-<a id="now-finally-apply-best-model-on-unseen-observation-xgboost-model-constantly-achieved-over-98-accuracy-on-all-crossvaltests" class="anchor" href="#now-finally-apply-best-model-on-unseen-observation-xgboost-model-constantly-achieved-over-98-accuracy-on-all-crossvaltests" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Now finally apply best model on unseen observation. xGBoost model constantly achieved over 98% accuracy on all crossval/tests:</h2>
+<a id="now-finally-apply-best-model-on-unseen-observation-note-xgboost-model-constantly-achieved-over-98-accuracy-on-all-crossvaltests" class="anchor" href="#now-finally-apply-best-model-on-unseen-observation-note-xgboost-model-constantly-achieved-over-98-accuracy-on-all-crossvaltests" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Now finally apply best model on unseen observation. <em>Note: xGBoost model constantly achieved over 98% accuracy on all crossval/tests</em>:</h2>
 
 <pre><code>## [1] "Now predicting unseen observations with: xgbTree"
 
