@@ -359,7 +359,7 @@ sprintf(<span class="pl-s"><span class="pl-pds">"</span>Cores registered = %d<sp
 <h3>
 <a id="almost-there-" class="anchor" href="#almost-there-" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Almost there !</h3>
 
-<p>Now that we have our final model lets apply it on testing dataset and then display confusion matrix so we can visually compare test result with previous cross validation one. We could also use a random forest or other classifier to ensemble to 2 or 3 predictors. Nevertheless this is not needed for this particular exercise as <em><strong>top two predictors achieved over 95% accuracy</strong></em> with the best one constantly over 99%.</p>
+<p>Now that we have our final model lets apply it on testing dataset and then display confusion matrix so we can visually compare test result with previous cross validation one. We could also use a random forest or other classifier to ensemble to 2 or 3 predictors. Nevertheless this is not needed for this particular exercise as <em><strong>top two predictors achieved over 95% accuracy</strong></em> with the best one constantly over 99% with a out-of-sample error rate of under 1% based on cross-validation dataset (used for all predictors) and the second test dataset (used only for best model).</p>
 
 <pre><code>## [1] "Predicting with best predictor: xgbTree"
 
@@ -399,7 +399,7 @@ sprintf(<span class="pl-s"><span class="pl-pds">"</span>Cores registered = %d<sp
 <h2>
 <a id="final-step" class="anchor" href="#final-step" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Final step</h2>
 
-<p>Now finally apply best model on unseen observation. <em>Note: xGBoost model constantly achieved over 98% accuracy on all crossval/tests</em>:</p>
+<p>Now finally apply best model on unseen observation. <em>Note: xGBoost model constantly achieved over 99% accuracy on all cross-validation testing pointing to a out-of-sample error rate under 1%</em>:</p>
 
 <pre><code>## [1] "Now predicting unseen observations with: xgbTree"
 
